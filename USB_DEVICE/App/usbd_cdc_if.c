@@ -23,6 +23,8 @@
 
 /* USER CODE BEGIN INCLUDE */
 
+#include "ptt_if.h"
+
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +51,6 @@
   */
 
 /* USER CODE BEGIN PRIVATE_TYPES */
-
 /* USER CODE END PRIVATE_TYPES */
 
 /**
@@ -62,6 +63,10 @@
   */
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
+
+#define APP_RX_DATA_SIZE  64
+#define APP_TX_DATA_SIZE  64
+
 /* USER CODE END PRIVATE_DEFINES */
 
 /**
@@ -228,8 +233,19 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
     break;
 
     case CDC_SET_CONTROL_LINE_STATE:
+    /* Send DTR and RTS states */
+    {
+      uint8_t dtr = 0;
+      uint8_t rts = 0;
 
-    break;
+      if (pbuf [2] & 0x01) dtr = 1;
+      if (pbuf [2] & 0x02) rts = 1;
+
+      PTT_DTR_TX (dtr);
+      PTT_RTS_TX (rts);
+
+      break;
+    }
 
     case CDC_SEND_BREAK:
 
@@ -261,6 +277,11 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+
+  //++++++
+  /* Place here a procedure for write to CAT buffer */
+  //++++++
+
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);

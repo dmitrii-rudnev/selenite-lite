@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "si5351a.h"
+#include "ptt_if.h"
 
 /* USER CODE END Includes */
 
@@ -109,7 +109,8 @@ int main(void)
   MX_I2C3_Init ();
   HAL_Delay (500);
 
-  Si5351a_Init ();  //Set HSE = 24.576 MHz from VFO
+  /* Set HSE = 24.576 MHz from VFO */
+  PTT_Set_HSE ();
   HAL_Delay (500);
 
   /* USER CODE END Init */
@@ -137,13 +138,15 @@ int main(void)
   trx.sysclock = 0U;
   trx.systicks = 10U;
 
+  PTT_Init ();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
+    PTT_Handler ();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
