@@ -21,6 +21,8 @@
 #include "main.h"
 #include "ptt_if.h"
 #include "si5351a.h"
+#include "cat_if.h"
+#include "usb_device.h"
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -38,6 +40,7 @@ PTT_TypeDef ptt;
 
 /* External variables --------------------------------------------------------*/
 
+extern USBD_HandleTypeDef hUsbDeviceFS;
 extern TRX_TypeDef trx;
 
 /* Private functions ---------------------------------------------------------*/
@@ -532,9 +535,14 @@ void PTT_Key_Off_Time (void)
 
 void PTT_Handler (void)
 {
-  //++++++
-  /* Start here CAT handler */
-  //++++++
+  if (hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED)
+  {
+    CAT_Handler (1U);
+  }
+  else
+  {
+    CAT_Handler (0U);
+  }
 
   if (ptt.key_off_time != 0U)
   {

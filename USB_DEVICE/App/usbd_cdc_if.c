@@ -24,6 +24,7 @@
 /* USER CODE BEGIN INCLUDE */
 
 #include "ptt_if.h"
+#include "cat_if.h"
 
 /* USER CODE END INCLUDE */
 
@@ -278,9 +279,10 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
 
-  //++++++
-  /* Place here a procedure for write to CAT buffer */
-  //++++++
+  for (uint32_t i = 0; i < *Len; i++)
+  {
+    CAT_Buff_Write_Byte (Buf [i]);  // CAT_Buff_Write_Byte() is declared in cat_if.c
+  }
 
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
