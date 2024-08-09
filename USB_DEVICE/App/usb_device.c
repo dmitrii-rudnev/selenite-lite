@@ -2,24 +2,22 @@
 /**
   ******************************************************************************
   * @file           : usb_device.c
-  * @version        : v1.0_Cube
+  * @version        : v2.0
   * @brief          : This file implements the USB Device
   ******************************************************************************
-  * @attention
+  * @attention  *
+  * Copyrigh &copy; 2024 Selenite Project. All rights reserved.
   *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
+  * This software component is licensed under [BSD 3-Clause license]
+  * (http://opensource.org/licenses/BSD-3-Clause/), the "License".<br>
+  * You may not use this file except in compliance with the License.  *
   ******************************************************************************
   */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
 
+#include "usbd_composite.h"
 #include "usb_device.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"
@@ -28,66 +26,59 @@
 
 /* USER CODE BEGIN Includes */
 
+#include "usbd_conf.h"
+
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
+extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
+
 /* USER CODE END PV */
-
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-
-/* USER CODE END PFP */
 
 /* USB Device Core handle declaration. */
 USBD_HandleTypeDef hUsbDeviceFS;
-
-/*
- * -- Insert your variables declaration here --
- */
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/*
- * -- Insert your external function declaration here --
- */
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */
 
 /**
   * Init USB device Library, add supported class and start the library
   * @retval None
   */
-void MX_USB_DEVICE_Init(void)
+
+void MX_USB_DEVICE_Init (void)
 {
   /* USER CODE BEGIN USB_DEVICE_Init_PreTreatment */
 
+  if (USBD_Init (&hUsbDeviceFS, &FS_Desc, DEVICE_FS) != USBD_OK)
+  {
+    Error_Handler ();
+  }
+
+  HAL_PCDEx_SetRxFiFo (&hpcd_USB_OTG_FS, 0x80);
+  HAL_PCDEx_SetTxFiFo (&hpcd_USB_OTG_FS, 0, 0x40);
+  HAL_PCDEx_SetTxFiFo (&hpcd_USB_OTG_FS, 1, 0x10);
+  HAL_PCDEx_SetTxFiFo (&hpcd_USB_OTG_FS, 2, 0x10);
+  HAL_PCDEx_SetTxFiFo (&hpcd_USB_OTG_FS, 3, 0xC0);
+
+  if (USBD_RegisterClass (&hUsbDeviceFS, &USBD_COMP) != USBD_OK)
+  {
+    Error_Handler ();
+  }
+
+  if (USBD_COMP_RegisterInterface (&hUsbDeviceFS, &USBD_COMP_fops_FS)
+      != USBD_OK)
+  {
+    Error_Handler ();
+  }
+
+  if (USBD_Start (&hUsbDeviceFS) != USBD_OK)
+  {
+    Error_Handler ();
+  }
+
+  return;
+
   /* USER CODE END USB_DEVICE_Init_PreTreatment */
-
-  /* Init Device Library, add supported class and start the library. */
-  if (USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS) != USBD_OK)
-  {
-    Error_Handler();
-  }
-  if (USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC) != USBD_OK)
-  {
-    Error_Handler();
-  }
-  if (USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS) != USBD_OK)
-  {
-    Error_Handler();
-  }
-  if (USBD_Start(&hUsbDeviceFS) != USBD_OK)
-  {
-    Error_Handler();
-  }
-
-  /* USER CODE BEGIN USB_DEVICE_Init_PostTreatment */
-
-  /* USER CODE END USB_DEVICE_Init_PostTreatment */
 }
 
 /**

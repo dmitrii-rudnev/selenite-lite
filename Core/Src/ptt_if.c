@@ -22,6 +22,7 @@
 #include "ptt_if.h"
 #include "si5351a.h"
 #include "cat_if.h"
+#include "dsp_if.h"
 #include "usb_device.h"
 
 /* Private typedef -----------------------------------------------------------*/
@@ -176,9 +177,9 @@ void ptt_set_tx (void)
     }
 
     trx.is_tx = 1U;
-    //++++++
-    /* Call here a DSP TX mode setting */
-    //++++++
+
+    DSP_Set_TX ();
+
     if (trx.vfo)
     {
       ptt_set_bpf (trx.vfob);
@@ -212,9 +213,9 @@ void ptt_set_rx (void)
     {
       VFO_Toggle_VFO ();
     }
-    //++++++
-    /* Call here a DSP RX mode setting */
-    //++++++
+
+    DSP_Set_RX ();
+    
     if (trx.vfo)
     {
       ptt_set_bpf (trx.vfob);
@@ -400,9 +401,8 @@ void PTT_Set_Mode (uint8_t trx_mode)
       trx.mode = MODE_USB;
       break;
   }
-  //++++++
-  /* Call here a DSP modulation setting */
-  //++++++
+
+  DSP_Set_Mode (trx_mode);
 }
 
 
@@ -509,8 +509,9 @@ void PTT_Init (void)
 
   trx.displayed = trx.sysclock;
 
+  DSP_Init ();
+
   //++++++
-  /* Start here DSP Init */
   /* Start here UI Init */
   //++++++
 

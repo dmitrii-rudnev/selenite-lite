@@ -1,14 +1,15 @@
+
 /**
   *******************************************************************************
   *
-  * @file    ptt_if.h
-  * @brief   Header for ptt_if.c file
-  * @version v2.0
-  * @date    29.03.2022
+  * @file    codec_if.h
+  * @brief   Header for codec_if.c file
+  * @version v2.1
+  * @date    28.10.2022
   * @author  Dmitrii Rudnev
   *
   *******************************************************************************
-  * Copyrigh &copy; 2020 Selenite Project. All rights reserved.
+  * Copyrigh &copy; 2022 Selenite Project. All rights reserved.
   *
   * This software component is licensed under [BSD 3-Clause license]
   * (http://opensource.org/licenses/BSD-3-Clause/), the "License".<br>
@@ -16,30 +17,20 @@
   *******************************************************************************
   */
 
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef PTT_IF_H_
-#define PTT_IF_H_
+#ifndef CODEC_IF_H_
+#define CODEC_IF_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+
+#include "main.h"
 #include "stm32f4xx_hal.h"
 
 /* Exported types ------------------------------------------------------------*/
-typedef struct
-{
-  uint8_t  is_enable;
-  uint8_t  cat_is_on;
-  uint8_t  dtr_is_on;
-  uint8_t  rts_is_on;
-  uint8_t  button_is_on;
-  uint8_t  key_dah_is_on;
-  uint8_t  key_dit_is_on;
-  uint32_t key_off_time;
-} PTT_TypeDef;
 
 /* Exported constants --------------------------------------------------------*/
 
@@ -47,28 +38,35 @@ typedef struct
 
 /* Exported functions prototypes ---------------------------------------------*/
 
-void PTT_Key_Off_Time (void);
-void PTT_Set_HSE (void);
-void PTT_Init (void);
-void PTT_Set_Mode (uint8_t);
-void PTT_CAT_TX (uint8_t);
-void PTT_DTR_TX (uint8_t);
-void PTT_RTS_TX (uint8_t);
-void PTT_Handler (void);
-void VFO_Toggle_VFO (void);
-void VFO_Set_Tune (uint32_t);
-void VFO_Set_Split (uint8_t);
-uint32_t VFO_Get_Tune (void);
-uint32_t VFO_Get_Tune_BCD (void);
-uint32_t HEX_to_BCD (uint32_t);
-uint32_t BCD_to_CAT (uint32_t);
+void Codec_Init (uint32_t);
+void Codec_Set_RX (void);
+void Codec_Set_TX (void);
+uint8_t Codec_AF_Vol (uint8_t);
 
 /* Private defines -----------------------------------------------------------*/
 
-#define KEY_TIMEOUT                           30 // 300 ms
+#ifndef CODEC_I2C_PORT
+#define CODEC_I2C_PORT             hi2c3
+#endif /* CODEC_I2C_PORT */
+
+extern I2C_HandleTypeDef CODEC_I2C_PORT;
+
+#ifndef CODEC_I2C_TIMEOUT
+#define CODEC_I2C_TIMEOUT          10
+#endif /* CODEC_I2C_TIMEOUT */
+
+#ifndef CODEC_BUS_BASE_ADDR
+#define CODEC_BUS_BASE_ADDR        0x18
+#endif /* CODEC_BUS_BASE_ADDR */
+
+typedef struct Output_Level
+{
+  uint8_t percent;
+  uint8_t reg_val;
+} Output_Level;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* PTT_IF_H_ */
+#endif /* CODEC_IF_H_ */
