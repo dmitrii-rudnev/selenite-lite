@@ -1,2 +1,2 @@
 # selenite-lite
-Selenite Lite SDR HF Transceiver firmware
+Selenite Lite SDR HF Transceiver Base Edition firmware
