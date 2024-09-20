@@ -19,13 +19,12 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "usbd_composite.h"
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
 
-#include "cat_if.h"
-#include "ptt_if.h"
+#include "rxtx_if.h"
+#include "usbd_composite.h"
 
 /* USER CODE END INCLUDE */
 
@@ -281,12 +280,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-
-  //CDC_Transmit_FS (Buf, *Len); //++++++
-  for (uint32_t i = 0; i < *Len; i++)
-  {
-    CAT_Buff_Write_Byte (Buf [i]);  // CAT_Buff_Write_Byte() is declared in cat_if.c
-  }
+  CAT_Buff_Write (Buf, *Len);  /* CAT_Buff_Write() is declared in ptt_if.h */
 
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
@@ -309,13 +303,12 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 {
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 7 */
-
   result = COMP_CDC_Transmit_FS (Buf, Len); //++++++
 
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
-  if (hcdc->TxState != 0){
-    return USBD_BUSY;
-  }
+  
+  if (hcdc->TxState != 0) { return USBD_BUSY; }
+
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
   result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
   /* USER CODE END 7 */

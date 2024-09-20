@@ -16,6 +16,7 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
+
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
@@ -23,7 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "ptt_if.h"
+#include "rxtx_if.h"
 
 /* USER CODE END Includes */
 
@@ -54,6 +55,7 @@ DMA_HandleTypeDef hdma_spi2_tx;
 RTC_HandleTypeDef hrtc;
 
 SPI_HandleTypeDef hspi1;
+DMA_HandleTypeDef hdma_spi1_tx;
 
 TIM_HandleTypeDef htim2;
 
@@ -61,8 +63,6 @@ TIM_HandleTypeDef htim2;
 
 RTC_TimeTypeDef sTime;
 RTC_DateTypeDef sDate;
-
-TRX_TypeDef trx;
 
 /* USER CODE END PV */
 
@@ -110,7 +110,7 @@ int main(void)
   HAL_Delay (500);
 
   /* Set HSE = 24.576 MHz from VFO */
-  PTT_Set_HSE ();
+  VFO_Init ();
   HAL_Delay (500);
 
   /* USER CODE END Init */
@@ -135,9 +135,6 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
 
-  trx.sysclock = 0U;
-  trx.systicks = 10U;
-
   PTT_Init ();
 
   /* USER CODE END 2 */
@@ -147,6 +144,7 @@ int main(void)
   while (1)
   {
     PTT_Handler ();
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -383,8 +381,6 @@ static void MX_RTC_Init(void)
   }
 
   /* USER CODE BEGIN Check_RTC_BKUP */
-
-  /* Check for backup domain is working */
   if (HAL_RTCEx_BKUPRead (&hrtc, RTC_BKP_DR1) == 0U)
   {
   /* USER CODE END Check_RTC_BKUP */
@@ -410,9 +406,7 @@ static void MX_RTC_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN RTC_Init 2 */
-
     HAL_RTCEx_BKUPWrite (&hrtc, RTC_BKP_DR1, 0x80000000U);
-    /* Write to RTC_BKP_DR1 if the register is empty */
   }
   /* USER CODE END RTC_Init 2 */
 
@@ -513,6 +507,7 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA1_CLK_ENABLE();
+  __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
   /* DMA1_Stream3_IRQn interrupt configuration */
@@ -521,6 +516,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream4_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 
 }
 
