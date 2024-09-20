@@ -77,8 +77,9 @@ typedef struct
 
 void CAT_Buff_Write (uint8_t*, uint32_t);
 
-void PTT_Init (void);
-void PTT_Handler (void);
+void RXTX_Init (void);
+void RXTX_Handler (void);
+
 void PTT_Set_Mode (uint8_t);
 
 void PTT_Key_RX (void);

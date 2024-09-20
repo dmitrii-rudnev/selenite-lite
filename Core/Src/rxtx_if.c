@@ -611,7 +611,7 @@ void VFO_Init (void)
   *
   */
 
-void PTT_Init (void)
+void RXTX_Init (void)
 {
   /* PTT and CAT init */
   trx.vfo   = 0U;
@@ -656,7 +656,7 @@ void PTT_Init (void)
   *
   */
 
-void PTT_Handler (void)
+void RXTX_Handler (void)
 {
   if (cat.wr_ptr)
   {

@@ -135,7 +135,7 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
 
-  PTT_Init ();
+  RXTX_Init ();
 
   /* USER CODE END 2 */
 
@@ -143,7 +143,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    PTT_Handler ();
+    RXTX_Handler ();
 
     /* USER CODE END WHILE */
 
