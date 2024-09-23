@@ -40,10 +40,6 @@ void Si5351a_Set_Freq (uint32_t, uint16_t, uint16_t);
 #define SI5351_I2C_PORT           hi2c3
 #endif /* SI5351_I2C_PORT */
 
-#ifndef SI5351_I2C_TIMEOUT
-#define SI5351_I2C_TIMEOUT        10
-#endif /* SI5351_I2C_TIMEOUT */
-
 #ifndef SI5351_BUS_BASE_ADDR
 #define SI5351_BUS_BASE_ADDR      0x60
 #endif /* SI5351_BUS_BASE_ADDR */
