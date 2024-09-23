@@ -3,12 +3,12 @@
   *
   * @file    codec_if.c
   * @brief   Codec interface
-  * @version v2.1
-  * @date    28.10.2022
+  * @version v2.2
+  * @date    23.09.2024
   * @author  Dmitrii Rudnev
   *
   *******************************************************************************
-  * Copyrigh &copy; 2022 Selenite Project. All rights reserved.
+  * Copyrigh &copy; 2024 Selenite Project. All rights reserved.
   *
   * This software component is licensed under [BSD 3-Clause license]
   * (http://opensource.org/licenses/BSD-3-Clause/), the "License".<br>
@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "codec_if.h"
+#include "i2c_if.h"
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -47,55 +48,14 @@ const Output_Level output_level [21] =
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief This function checks if the I2C device is ready
- *
- */
-
-uint8_t codec_i2c_is_not_ready (void)
-{
-  if (HAL_I2C_IsDeviceReady (&CODEC_I2C_PORT,
-                             (uint16_t) CODEC_BUS_BASE_ADDR << 1,
-                             2, CODEC_I2C_TIMEOUT) != HAL_OK)
-  {
-    Error_Handler ();
-    return 1U;
-  }
-  return 0U;
-}
-
-/**
- * @brief This function checks for I2C transmission errors
- *
- */
-
-void codec_i2c_get_error (void)
-{
-  if (HAL_I2C_GetError (&CODEC_I2C_PORT) != HAL_I2C_ERROR_AF)
-  {
-    Error_Handler ();
-  }
-}
-
-
-/**
  * @brief This function writes to a codec register
  *
  */
 
 void codec_write_reg (uint8_t addr, uint8_t data)
 {
-  if (codec_i2c_is_not_ready ()) return;
-
-  uint8_t d [2] = { addr, data };
-
-  if (HAL_I2C_Master_Transmit (&CODEC_I2C_PORT,
-                               (uint16_t) CODEC_BUS_BASE_ADDR << 1,
-                               (uint8_t*) d, 2, CODEC_I2C_TIMEOUT) != HAL_OK)
-  {
-    codec_i2c_get_error ();
-  }
+  I2C_Transmit (&CODEC_I2C_PORT, (uint16_t)CODEC_BUS_BASE_ADDR, addr, data);
 }
-
 
 /**
  * @brief This function reads from a codec register
@@ -104,26 +64,8 @@ void codec_write_reg (uint8_t addr, uint8_t data)
 
 void codec_read_reg (uint8_t addr, uint8_t *data)
 {
-  if (codec_i2c_is_not_ready ()) return;
-
   addr -= 1U;
-
-  if (HAL_I2C_Master_Transmit (&CODEC_I2C_PORT,
-                               (uint16_t) CODEC_BUS_BASE_ADDR << 1,
-                               (uint8_t*) &addr, 1, CODEC_I2C_TIMEOUT) != HAL_OK)
-  {
-    codec_i2c_get_error ();
-    return;
-  }
-
-  if (codec_i2c_is_not_ready ()) return;
-
-  if (HAL_I2C_Master_Receive (&CODEC_I2C_PORT,
-                              (uint16_t) CODEC_BUS_BASE_ADDR << 1,
-                              data, 1, CODEC_I2C_TIMEOUT) != HAL_OK)
-  {
-    codec_i2c_get_error ();
-  }
+  I2C_Receive (&CODEC_I2C_PORT, (uint16_t)CODEC_BUS_BASE_ADDR, addr, data);
 }
 
 /**
@@ -424,7 +366,7 @@ void codec_init (uint32_t sr)
 
   codec_write_reg (102, 0x02);
 
-  /*
+
   if (sr == 96000U)
   {
     codec_write_reg (3, 0x20);
@@ -435,10 +377,7 @@ void codec_init (uint32_t sr)
     codec_write_reg (3, 0x10);
     codec_write_reg (7, 0x0A);
   }
-  */
 
-  codec_write_reg (3, 0x20);
-  codec_write_reg (7, 0x6A);
 
   /* Set D7 of Register 14 to set HP outputs for ac-coupled driver configuration */
   codec_bit_set (14, 7);

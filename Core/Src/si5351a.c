@@ -3,12 +3,12 @@
   *
   * @file    si5351a.c
   * @brief   si5351a frequency synthesizer driver
-  * @version v1.0
-  * @date    18.10.2022
+  * @version v1.1
+  * @date    23.09.2024
   * @author  Dmitrii Rudnev
   *
   *******************************************************************************
-  * Copyrigh &copy; 2022 Selenite Project. All rights reserved.
+  * Copyrigh &copy; 2024 Selenite Project. All rights reserved.
   *
   * This software component is licensed under [BSD 3-Clause license]
   * (http://opensource.org/licenses/BSD-3-Clause/), the "License".<br>
@@ -24,6 +24,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "si5351a.h"
+#include "i2c_if.h"
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -53,36 +54,6 @@ extern I2C_HandleTypeDef SI5351_I2C_PORT;
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief This function checks if the I2C device is ready
- *
- */
-
-uint8_t si5351_i2c_is_not_ready (void)
-{
-  if (HAL_I2C_IsDeviceReady (&SI5351_I2C_PORT,
-                             (uint16_t) SI5351_BUS_BASE_ADDR << 1,
-                             2, SI5351_I2C_TIMEOUT) != HAL_OK)
-  {
-    Error_Handler ();
-    return 1U;
-  }
-  return 0U;
-}
-
-/**
- * @brief This function checks for I2C transmission errors
- *
- */
-
-void si5351_i2c_get_error (void)
-{
-  if (HAL_I2C_GetError (&SI5351_I2C_PORT) != HAL_I2C_ERROR_AF)
-  {
-    Error_Handler ();
-  }
-}
-
-/**
  * @brief This function transfers some bytes to I2C device
  *
  * @param addr  - initial address of destination
@@ -93,14 +64,7 @@ void si5351_i2c_get_error (void)
 
 void si5351_write_bulk (uint8_t addr, uint8_t *data, uint8_t bytes)
 {
-  if (si5351_i2c_is_not_ready ()) return;
-
-  if (HAL_I2C_Mem_Write (&SI5351_I2C_PORT,
-                         (uint16_t) SI5351_BUS_BASE_ADDR << 1,
-                         addr, 1, data, bytes, SI5351_I2C_TIMEOUT) != HAL_OK)
-  {
-    si5351_i2c_get_error ();
-  }
+  I2C_Transmit_Bulk (&SI5351_I2C_PORT, (uint16_t)SI5351_BUS_BASE_ADDR, addr, data, bytes);
 }
 
 /**
@@ -113,16 +77,7 @@ void si5351_write_bulk (uint8_t addr, uint8_t *data, uint8_t bytes)
 
 void si5351_write (uint8_t addr, uint8_t data)
 {
-  if (si5351_i2c_is_not_ready ()) return;
-
-  uint8_t d[2] = {addr, data};
-
-  if (HAL_I2C_Master_Transmit (&SI5351_I2C_PORT,
-                               (uint16_t) SI5351_BUS_BASE_ADDR << 1,
-                               (uint8_t *) d, 2, SI5351_I2C_TIMEOUT) != HAL_OK)
-  {
-    si5351_i2c_get_error ();
-  }
+  I2C_Transmit (&SI5351_I2C_PORT, (uint16_t)SI5351_BUS_BASE_ADDR, addr, data);
 }
 
 /**
@@ -135,24 +90,7 @@ void si5351_write (uint8_t addr, uint8_t data)
 
 void si5351_read (uint8_t addr, uint8_t *data)
 {
-  if (si5351_i2c_is_not_ready ()) return;
-
-  while (HAL_I2C_Master_Transmit (&SI5351_I2C_PORT,
-                                  (uint16_t) SI5351_BUS_BASE_ADDR << 1,
-                                  (uint8_t*) &addr, 1, SI5351_I2C_TIMEOUT) != HAL_OK)
-  {
-    si5351_i2c_get_error ();
-    return;
-  }
-
-  if (si5351_i2c_is_not_ready ()) return;
-
-  while (HAL_I2C_Master_Receive (&SI5351_I2C_PORT,
-                                 (uint16_t) SI5351_BUS_BASE_ADDR << 1,
-                                 data, 1, SI5351_I2C_TIMEOUT) != HAL_OK)
-  {
-    si5351_i2c_get_error ();
-  }
+  I2C_Receive (&SI5351_I2C_PORT, (uint16_t)SI5351_BUS_BASE_ADDR, addr, data);
 }
 
 /**
@@ -366,7 +304,7 @@ void Si5351a_Set_Freq (uint32_t fout, uint16_t i, uint16_t q)
 
 void Si5351a_Init (void)
 {
-  fxtal = F_XTAL;
+  fxtal = (*(uint32_t*)(0x08007FF8));
 
   si5351_power_down ();               /* Reset si5351a chip */
   HAL_Delay (100);

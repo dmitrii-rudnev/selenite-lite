@@ -1,10 +1,10 @@
 /**
   *******************************************************************************
   *
-  * @file    rxtx_if.h
+  * @file    ptt_if.h
   * @brief   Header for ptt_if.c file
-  * @version v1.0
-  * @date    20.09.2024
+  * @version v2.0
+  * @date    18.09.2024
   * @author  Dmitrii Rudnev
   *
   *******************************************************************************
@@ -91,6 +91,12 @@ void VFO_Toggle_VFO (void);
 void VFO_Set_Tune (uint32_t);
 void VFO_Set_Split (uint8_t);
 
+uint32_t VFO_Get_Tune (void);
+uint32_t VFO_Get_Tune_BCD (void);
+
+uint32_t HEX_to_BCD (uint32_t);
+uint32_t BCD_to_CAT (uint32_t);
+
 /* Private defines -----------------------------------------------------------*/
 
 #ifndef hi2c_tx
@@ -112,4 +118,4 @@ extern I2C_HandleTypeDef hi2c_tx;
 }
 #endif
 
-#endif /* PTT_IF_H_ */
+#endif /* RXTX_IF_H_ */
