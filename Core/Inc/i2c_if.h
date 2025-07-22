@@ -39,6 +39,9 @@ void I2C_Receive (I2C_HandleTypeDef*, uint16_t, uint8_t, uint8_t*);
 void I2C_Transmit (I2C_HandleTypeDef*, uint16_t, uint8_t, uint8_t);
 void I2C_Transmit_Bulk (I2C_HandleTypeDef*, uint16_t, uint8_t, uint8_t*, uint8_t);
 
+void I2C_Init_ (void);
+void I2C_Transmit_ (uint8_t, uint8_t);
+
 /* Private defines -----------------------------------------------------------*/
 
 #ifndef I2C_TIMEOUT

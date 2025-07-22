@@ -94,25 +94,19 @@ void VFO_Set_Split (uint8_t);
 uint32_t VFO_Get_Tune (void);
 uint32_t VFO_Get_Tune_BCD (void);
 
+void PA_Init (void);
+
 uint32_t HEX_to_BCD (uint32_t);
 uint32_t BCD_to_CAT (uint32_t);
 
 /* Private defines -----------------------------------------------------------*/
 
 #ifndef hi2c_tx
-#define hi2c_tx                                 hi2c1 //hi2c2
+#define hi2c_tx                                 hi2c1
 extern I2C_HandleTypeDef hi2c_tx;
 #endif
 
-#ifndef I2CTIMEOUT 
-#define I2CTIMEOUT                              10
-#endif
-
-#ifndef PCA9554_BUS_BASE_ADDR
-#define PCA9554_BUS_BASE_ADDR                   0x20
-#endif
-
-#define KEY_TIMEOUT                            30 // 300 ms
+#define KEY_TIMEOUT                             30 // 300 ms
 
 #ifdef __cplusplus
 }

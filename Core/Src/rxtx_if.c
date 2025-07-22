@@ -148,6 +148,16 @@ uint32_t CAT_to_HEX (void)
 }
 
 /**
+  * @brief This function controls external power amplifier 
+  *
+  */
+
+void pca9554_write (uint8_t addr, uint8_t data)
+{
+  I2C_Transmit_ (addr, data);
+}
+
+/**
   * @brief This function sets BPF band and mode
   *
   * The function sets BPF band according to VFO frequency and sets RX/TX mode
@@ -156,13 +166,38 @@ uint32_t CAT_to_HEX (void)
 
 void ptt_set_bpf (uint32_t tune_new)
 {
-  uint8_t retval = 0x06;
+  uint8_t bpf = 0x06;
+  uint8_t lpf = 0x02;
 
-  if (tune_new >  4000000U) { retval = 0x04; }
-  if (tune_new >  8000000U) { retval = 0x02; }
-  if (tune_new > 16000000U) { retval = 0x00; }
- 
-  if (retval & 0x02)
+  if (tune_new >  2000000U)
+  {
+    lpf = 0x04;
+  }
+  if (tune_new >  4000000U)
+  {
+    bpf = 0x04;
+    lpf = 0x08;
+  }
+  if (tune_new >  8000000U)
+  {
+    bpf = 0x02;
+    lpf = 0x10;
+  }
+  if (tune_new > 16000000U)
+  {
+    bpf = 0x00;
+    lpf = 0x20;
+  }
+  if (tune_new > 24000000U)
+  {
+    lpf = 0x40;
+  }
+  if (tune_new > 32000000U)
+  {
+    lpf = 0x00;
+  }
+
+  if (bpf & 0x02)
   {
     HAL_GPIO_WritePin (S1_GPIO_Port, S1_Pin, GPIO_PIN_SET);
   }
@@ -171,7 +206,7 @@ void ptt_set_bpf (uint32_t tune_new)
     HAL_GPIO_WritePin (S1_GPIO_Port, S1_Pin, GPIO_PIN_RESET);
   }
 
-  if (retval & 0x04)
+  if (bpf & 0x04)
   {
     HAL_GPIO_WritePin (S2_GPIO_Port, S2_Pin, GPIO_PIN_SET);
   }
@@ -185,13 +220,27 @@ void ptt_set_bpf (uint32_t tune_new)
     HAL_GPIO_WritePin (TX_GPIO_Port, TX_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin (QSE_EN_GPIO_Port, QSE_EN_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin (QSD_EN_GPIO_Port, QSD_EN_Pin, GPIO_PIN_SET);
+
+    lpf |= 0x01;
   }
   else
   {
     HAL_GPIO_WritePin (TX_GPIO_Port, TX_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin (QSE_EN_GPIO_Port, QSE_EN_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin (QSD_EN_GPIO_Port, QSD_EN_Pin, GPIO_PIN_RESET);
+
+    lpf &= 0xFE;
+
+    if (trx.mode == MODE_PKT)
+    {
+      HAL_GPIO_WritePin (QSD_EN_GPIO_Port, QSD_EN_Pin, GPIO_PIN_SET);
+    }
+    else
+    {
+      HAL_GPIO_WritePin (QSD_EN_GPIO_Port, QSD_EN_Pin, GPIO_PIN_RESET);
+    }
   }
+
+  pca9554_write (1, lpf);
 }
 
 /**
@@ -607,6 +656,18 @@ void VFO_Init (void)
 }
 
 /**
+  * @brief This function initialize PA and LPF
+  *
+  */
+
+void PA_Init (void)
+{
+  I2C_Init_ ();
+  pca9554_write (2, 0x00);
+  pca9554_write (3, 0x00);
+}
+
+/**
   * @brief This function initialize PTT, VFO and DSP
   *
   */
@@ -644,6 +705,7 @@ void RXTX_Init (void)
   trx.sysclock  = 0U;
   trx.displayed = trx.sysclock;
 
+  PA_Init  ();
   DSP_Init ();
   //++++++
   /* Start here UI Init */
