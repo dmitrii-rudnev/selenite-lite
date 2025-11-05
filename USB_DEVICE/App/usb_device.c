@@ -17,7 +17,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 
-#include "usbd_composite.h"
 #include "usb_device.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"
@@ -26,6 +25,7 @@
 
 /* USER CODE BEGIN Includes */
 
+#include "usbd_composite.h"
 #include "usbd_conf.h"
 
 /* USER CODE END Includes */

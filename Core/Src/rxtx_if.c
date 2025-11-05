@@ -19,8 +19,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "rxtx_if.h"
-#include "si5351a.h"
+#include "i2c_if.h"
 #include "dsp_if.h"
+#include "user_if.h"
+#include "si5351a.h"
 #include "usbd_cdc_if.h"
 #include <string.h>
 
@@ -707,9 +709,7 @@ void RXTX_Init (void)
 
   PA_Init  ();
   DSP_Init ();
-  //++++++
-  /* Start here UI Init */
-  //++++++
+  UI_Init  ();
 }
 
 /**
@@ -737,11 +737,8 @@ void RXTX_Handler (void)
   if ((trx.sysclock - trx.displayed) > 19)
   {
     trx.displayed = trx.sysclock;
-    //++++++
-    /* Start here UI handler */
-    //++++++
+    UI_Handler ();
   }
-
 }
 
 /**
